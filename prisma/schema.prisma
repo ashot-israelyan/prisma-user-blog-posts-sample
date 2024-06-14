@@ -8,8 +8,45 @@ datasource db {
 }
 
 model User {
-  id    Int    @id
+  id    Int    @id @default(autoincrement())
   email String @unique
+  name  String @map("firstName")
+  role  Role?  @default(USER)
+
+  profile Profile?
+  posts   Post[]
+
+  @@unique([name, role])
+  @@index([id, email])
+  @@map("users")
+}
+
+model Profile {
+  id     Int    @id @default(autoincrement())
+  bio    String
+  userId Int    @unique
+  user   User   @relation(fields: [userId], references: [id])
+}
+
+model Post {
+  id         Int        @id @default(autoincrement())
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  title      String
+  likeNum    Int        @default(0)
+  published  Boolean    @default(false)
+  author     User?      @relation(fields: [authorId], references: [id])
+  authorId   Int?
+  categories Category[]
+}
+
+model Category {
+  id    Int    @id @default(autoincrement())
   name  String
-  role  String
+  posts Post[]
+}
+
+enum Role {
+  USER
+  ADMIN
 }
