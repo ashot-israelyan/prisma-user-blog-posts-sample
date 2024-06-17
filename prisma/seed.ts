@@ -1,6 +1,20 @@
 import { Prisma, PrismaClient } from '@prisma/client';
+import { faker } from '@faker-js/faker';
 
 const prisma = new PrismaClient();
+
+function generatePostData(): Prisma.PostCreateInput {
+	return {
+		title: faker.lorem.sentence(),
+		published: faker.datatype.boolean(),
+		likeNum: faker.number.int({ min: 0, max: 100 }),
+		categories: {
+			connect: [
+				{ id: faker.number.int({ min: 1, max: 10 }) }, // Assuming 2 categories
+			],
+		},
+	};
+}
 
 const userData: Prisma.UserCreateInput[] = [
 	{
@@ -13,26 +27,12 @@ const userData: Prisma.UserCreateInput[] = [
 					published: true,
 					likeNum: 10,
 					categories: {
-						create: [
-							{
-								name: "Data Base",
-							},
-							{
-								name: "Big Data",
-							},
-						],
+						create: Array.from({ length: 10 }, () => {
+							return {
+								name: faker.commerce.productName()
+							}
+						})
 					},
-				},
-				{
-					title: "Follow Prisma on Twitter",
-					categories: {
-						connect: [
-							{
-								id: 1,
-							},
-						],
-					},
-					published: true,
 				},
 			],
 		},
@@ -41,55 +41,22 @@ const userData: Prisma.UserCreateInput[] = [
 		name: "Jack",
 		email: "jack@prisma.io",
 		posts: {
-			create: [
-				{
-					title: "Follow Prisma on Twitter",
-					categories: {
-						connect: [
-							{
-								id: 1,
-							},
-						],
-					},
-					published: true,
-				},
-			],
+			create: Array.from({ length: 10 }, generatePostData)
 		},
 	},
 	{
 		name: "sara",
 		email: "sara@prisma.io",
 		posts: {
-			create: [
-				{
-					title: "Ask a question about Prisma on GitHub",
-
-					published: true,
-					categories: {
-						connect: [
-							{
-								id: 2,
-							},
-						],
-					},
-				},
-				{
-					title: "Prisma on YouTube",
-					categories: {
-						connect: [
-							{
-								id: 1,
-							},
-						],
-					},
-				},
-			],
+			create: Array.from({ length: 20 }, generatePostData)
 		},
 	},
 ];
 
 async function main() {
 	console.log('Start seeding...');
+
+	console.log(userData[0].posts)
 
 	for (const u of userData) {
 		const user = await prisma.user.create({

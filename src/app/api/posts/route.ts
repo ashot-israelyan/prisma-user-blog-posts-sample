@@ -35,9 +35,14 @@ export async function GET() {
 				}
 			}
 		},
-		include: {
-			author: true,
-		}
+		select: {
+			title: true,
+			author: {
+				select: {
+					name: true,
+				}
+			}
+		},
 	});
 
 	return new Response(JSON.stringify(posts));
